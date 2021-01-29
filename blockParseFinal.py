@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 # --------------------------------------------------------------------------
 # OligoMiner
-# blockParseJ2.py
+# blockParseFinal
 #
-# Version of blockParse including only a G check--
-# Includes RC check
-# Hopefully will include alterations to terminal report
-# Failiure and debugging reports altered
+# Final bersion of modified blockParse
+# Includes options for only G-Check, Reverse-Compliment Check,
+# as well as outputs in modified .bed or .fastq format
 #
 # (c) 2017 Molecular Systems Lab
 #
@@ -33,7 +32,7 @@
 # --------------------------------------------------------------------------
 
 # Specific script name.
-scriptName = 'blockParseJFinal'
+scriptName = 'blockParseFinal'
 
 # Specify script version.
 Version = '1.7'
@@ -116,7 +115,9 @@ class SequenceCrawler:
         # Variables for tracking reverse compliment check status
         self.reverseOn = reverseOn
         self.gOn = gOn
+        # This indicates whether to add + or - to file
         self.rPass = False
+        # We use this in case we need to write reverse compliment to file
         self.currentSeqR = "null"
 
         # Declare complementary relationships.
@@ -382,6 +383,7 @@ class SequenceCrawler:
     def reverseGCheck(self, seqR):
         """Check whether the reverse compliment of a sequence has correct G content."""
         reverseG = 0
+        # Note seqR is the reverse compliment of the input sequence
         for x in seqR:
             if x in 'Gg':
              reverseG = reverseG + 1
@@ -454,11 +456,13 @@ class SequenceCrawler:
         # First check for N bases and prohibited sequences
         # in case the sequence window has been extended
         # and now includes them.
-        # Next check Tm, %G
+        # Next check Tm, %G or %GC
+        # Next check reverse compliment if indicated
         # NOTE: Because of the variable setup, the tmCheck MUST come before the
-        # gCheck for this to work properly.
+        # gCheck or gcCheck for this to work properly.
 
-
+        # We store this as booleans up here so we don't redo the check
+        # if the reverse compliment option is turned on
         nCheckBool = False
         prohbitCheckBool = False
         tmCheckBool = False
@@ -485,7 +489,9 @@ class SequenceCrawler:
             seqReverse = str(Seq(self.block[i:i + j + self.l]).reverse_complement())
         
             if nCheckBool and prohbitCheckBool and tmCheckBool and self.reverseGCheck(seqReverse):
+                # Boolean stored to indicate which strand to write to file
                 self.rPass = True
+                # Stored for printing to .bed or .fastq purposes
                 self.currentSeqR = seqReverse
                 return True
 
@@ -730,13 +736,13 @@ class SequenceCrawler:
                 # success to terminal if requested.
                 if not (i + j + self.l >= int(blockLen) or j >= sizeRange):
                     startPos = self.start + i
-                    if self.rPass: ## '1' indicates to print a reverse sequence
+                    if self.rPass: ## '1' at end indicates to print a reverse sequence
                                    ## with currentSeqR as reverse strand
                         cands.append((str(startPos), str(startPos + j + self.l - 1),
                                       self.currentSeqR, 1))
                         self.rPass = False
                         self.currentSeqR = "null"              
-                    else:   ## Case where seq is on forward strand
+                    else:   ## Case where seq is on forward strand, hence the 0 at end
                         cands.append((str(startPos), str(startPos + j + self.l - 1),
                                       str(self.block[i:i + j + self.l]), 0))                   
                     if self.verbocity:
@@ -781,7 +787,7 @@ class SequenceCrawler:
             
             # Build the output file.
             for i, (start, end, seq, r) in enumerate(cands):
-                if r == 1:
+                if r == 1: ## Reverse strand case
                     outList.append('%s\t%s\t%s\t%s\t%s\t%s' % (chrom, start, end, '-', seq,
                                                          self.BedprobeTm(seq)))
                 else:
