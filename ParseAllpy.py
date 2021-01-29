@@ -1,11 +1,20 @@
+## Parses through a collection of .bed files for a given chromosome
+## and optimizes a probeset based off of lowest G-percent, while
+## maintaing no overlap.
+
 import sys
+
+## Note to use this include the chromosome number as the only argument
+## in command line
 
 
 class ParseAll:
     
     def __init__(self):
         pass
-
+    
+    ## Included for those who only want to scan certain coordinates 
+    ## Not implmented in normal usage below
     def shortenList(self, start, stop, file):
         
         bigList = open(file, "r")
@@ -30,6 +39,7 @@ class ParseAll:
         
         return finalFinalList
     
+    ## Adds g-percent value to lists since it is not in .bed file
     def addGPercent(self, noGList):
         probesParsed = 0
 
@@ -50,22 +60,20 @@ class ParseAll:
         print "\n"
 
 
-    
+    ## Combines all BigProbeFiles
     def createBigList(self, int1, int2):
         biggerList =[]
-        for x in range(13, 26):
+        for x in range(0, 26):
             fileName = "chrX_chm13_RC" + str(x) + ".bed"
             shortenedList = self.shortenList(int1, int2, fileName)
             for probe in shortenedList:
                 biggerList.append(probe)
-            print fileName + " is shortened to probes between " + str(int1) + " and " + str(int2)
-        print "Done shortening lists"
-        print "\n"
         return biggerList
 
+    ## Parses through Big List
     def parseThrough(self, finalProbeSet, int1, int2):
 
-        coordinateSet = []
+        coordinateSet = [] ## Set of all coordinates that are in the final probe set (so far)
         bestProbes = []
         totalProbes = len(finalProbeSet)
         probesParsed = 0
@@ -88,36 +96,16 @@ class ParseAll:
             
             probesParsed = probesParsed + 1
             
-            if probesParsed % 1000 == 0:
-                print str(probesParsed) + " out of " + str(len(finalProbeSet)) + " parsed"
-        
-        print "Done parsing"
-        print "\n"
+        ## Some optional values that can be implemented if needed
         percentCoverage = ((len(coordinateSet) * 1.0) / (int2-int1)) * 100
-        print "Final Percent Coverage: " + str(percentCoverage)
         kb = ((int2 - int1) * 1.0) / 1000
         probesKB = len(bestProbes) / kb
-        print "Probes per kilobase: " + str(probesKB)
+        ## Final parsed probe set
         return bestProbes
 
-    def bubbleSortPosition(self, list):
-        for itr in range(len(list) - 1, 0, -1):
-            for idx in range(itr):
-                if int(list[idx][1]) > int(list[idx + 1][1]):
-                    temp = list[idx]
-                    list[idx] = list[idx + 1]
-                    list[idx + 1] = temp
     
-    def bubbleSortG(self, list):
-        for itr in range(len(list) - 1, 0, -1):
-            for idx in range(itr):
-                if float(list[idx][6]) > float(list[idx + 1][6]):
-                    temp = list[idx]
-                    list[idx] = list[idx + 1]
-                    list[idx + 1] = temp
-
     def checkNoOverlap(self, list):
-    ## ONLY DO THIS IF THE LIST HAS BEEN BUBBLE SORTED BY POSITION FIRST
+    ## ONLY DO THIS IF THE LIST HAS BEEN SORTED BY POSITION FIRST
         x = 0
         onlyPositive = True
         while x < len(parsedProbes) - 1 and onlyPositive:
@@ -132,15 +120,17 @@ class ParseAll:
             print "Some overlaps exist"
         print "\n"
 
-print "Beginning selection process"
-print "\n"
+
 toParse = ParseAll()
 chrNum = str(sys.argv[1])
+
+## BigProbeFiles can be gotten from nexus library
 fileName = 'BigProbeFile' + chrNum + '.txt'
 shortFileName = 'chr' + chrNum
 fileThing = open(fileName, 'r')
 finalList = []
-print "Making new list"
+
+## Turning BigProbeFile into lists readable by above methods
 for line in fileThing:
     tempFinalList = []
     tempFinalList.append(shortFileName)
@@ -148,9 +138,11 @@ for line in fileThing:
     for item in tempList:
         tempFinalList.append(item)
     finalList.append(tempFinalList)
+    
 fileThing.close()
-print "Parsing"
-parsedProbes = toParse.parseThrough(finalList, 0, 180000000)
+parsedProbes = toParse.parseThrough(finalList, 0, 1800000000) ## Large length covers hg38
+
+## Sorting parsed probes by length
 parsedProbes.sort(key = lambda x: x[1])
 testFile = open('Parsed22.txt', 'w')
 for thing in parsedProbes:
