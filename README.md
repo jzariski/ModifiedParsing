@@ -11,3 +11,5 @@ created for G-percents of 0-25.
 FileWriter.py-- Used to construct big combined probe library for G-percent in range 0-25.
 
 scriptwriter.py-- Generates shell scripts for blockParseFinal parsing.
+
+ProbeWorker.py-- Program for working with parsed probes dataframe using pandas.
