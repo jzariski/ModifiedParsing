@@ -1,0 +1,22 @@
+Change Log between blockParse.py and blockParseFinal.py
+
+Note: Most changes involved adding in checks for g-percent where normally
+      gc-percent is checked. Beyond that changes involve adding in a reverse
+      compliment check as well as adding a '+' or '-' to the .fastq depending
+      on said check.
+
+
+Changes related to G-percent Check:
+Lines 71-72: Added values for needed for gpercent check, similar to gcpercent check
+Line 98: Added value numG on a strand, similar to numGC
+Lines 177-245: Added various operations and checks mirroring those for gc
+Lines 248-364: Again mirrored operations for gc, simply subbing in plain g values
+Lines 378-381: Added gCheck definition using above values
+
+
+
+Changes related to Reverse Compliment Check:
+Line 116: Tracks reverse compliment check status
+Line 119: Similar check but for added .fastq column
+Line 121: Another similar check for writing the reverse sequence to .fastq
+Lines 383-393: Checks reverse strand for G-percent
