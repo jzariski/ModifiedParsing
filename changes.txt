@@ -12,7 +12,10 @@ Line 98: Added value numG on a strand, similar to numGC
 Lines 177-245: Added various operations and checks mirroring those for gc
 Lines 248-364: Again mirrored operations for gc, simply subbing in plain g values
 Lines 378-381: Added gCheck definition using above values
+Line 478: Indicates the use of gCheck definition
+Lines 581-621: Error windows for gCheck
 
+ 
 
 
 Changes related to Reverse Compliment Check:
@@ -20,3 +23,17 @@ Line 116: Tracks reverse compliment check status
 Line 119: Similar check but for added .fastq column
 Line 121: Another similar check for writing the reverse sequence to .fastq
 Lines 383-393: Checks reverse strand for G-percent
+Line 487: Checks reverse strand if indicated along with gcheck
+Line 493: Indicates to write '-' to .fastq file
+Line 495: Inidcates to write reverse compliment to .fastq file
+Lines 735-758: Various uses of the rPass value to indicate which strand to 
+               print on .fastq--more in comments on section.
+Lines 789-794: Writing the reverse compliment to file
+
+Argument Changes:
+-RC turns on reverse compliment check
+-GON turns on gCheck instead of gcCheck
+-g/-G are min and max G allowed respecitvely
+-gc/-GC are min and max GC allowed respecitvely
+
+For details on how exactly checks are implemented, see comments in relevant section of program
